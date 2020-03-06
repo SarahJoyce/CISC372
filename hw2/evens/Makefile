@@ -1,4 +1,4 @@
-all : test1 test2 test3
+all : test1 test2 test3 test4 test5
 
 evens_lib.o: evens_lib.h evens_lib.c
 	cc -c -std=c11 -pedantic evens_lib.c
@@ -17,6 +17,12 @@ test2 : evens_driver.c evens.exe
 	
 test3 : evens_driver.c evens.exe
 	./evens.exe
+
+test4 : evens_driver.c evens.exe
+	./evens.exe 3 8 9 2 4 5 1 0
+
+test5 : evens_driver.c evens.exe
+	./evens.exe 14 88 23 90 36 74 65
 
 clean :
 	rm -f *.exe *~ *.o

@@ -3,23 +3,25 @@
 #include <stdlib.h>
 #include "evens_lib.h"
 // add other #includes as needed
+int *new_array;
 
-int * find_evens(int * p, int n, int * num_evens) {
- int j = 0;
+int *find_evens(int *p, int n, int *num_evens) {
+ int numEvens = 0;
   for(int i=0; i<n; i++){
-	if((p[i])%2 == 0){
-	  j++;
+	if(p[i]%2 == 0){
+	  numEvens++;
 	}
   }
-  num_evens = (int*)malloc(j*sizeof(int));
-  j=0;
+  *num_evens = numEvens;
+  int e = 0;
+  new_array = (int*)malloc(numEvens*sizeof(int));
   for(int i=0; i<n; i++){
-	if((p[i])%2==0){
-	  num_evens[j]==p[i];
-	  j++;
-	}
+     if(p[i]%2==0){
+	new_array[e] = p[i];
+	e++;
+     }
   }
-  return num_evens;
+  return new_array;
 }
 
 void print_array(int * p, int n) {

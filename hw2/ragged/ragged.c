@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 // add other #includes as needed
-#define BUFFSIZE 1024
 
 // TODO: create two global variables: 
 //   1. lengths. Type: pointer-to-int
