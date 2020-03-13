@@ -1,0 +1,194 @@
+		CISC 372  *  Spring 2020  *  Homework #3
+
+Released: Thursday, Mar. 5.
+Due: Friday, Mar. 13, 10:00 PM.
+
+
+****************************************************************************
+Remember to use SLURM (srun ...) when executing any long-running
+program on cisc372.cis.udel.edu. This makes your program execute on
+beowulf, the parallel machine, which is what you want. This applies to
+sequential and parallel programs. A sequential program can be run with
+"srun -n 1 ./foo".
+****************************************************************************
+
+
+Create a directory "hw3" in your personal repository.
+Commit it and all your solution files.
+
+1. pin
+
+Create a subdirectory "pin".
+
+I won't tell you the PIN to my ATM
+card, but I will tell you how to compute it. First I need to define a
+rather funny function on integers:
+
+Given any nonnegative integer i, let f(i) be the integer specified by
+the first 4 digits after the decimal point in the decimal expansion of
+sin^2(i).
+
+Now, given any nonnegative integer n, let g(n) be the sum, over all i
+in 0..(n-1), of f(i).
+ 
+Let h(n) = g(n)%10000. (The "%" is the "modulo" or "remainder"
+operator.) Note that h(n) is an integer in the range 0..9999.
+
+Again:
+    f(i) = first 4 digits after the decimal point in sin^2(i)
+    g(n) = sum of f(i) for all i in in 0..(n-1)
+    h(n) = g(n)%10000
+ 
+My PIN is h(10^10), i.e., h(n) when n is ten billion.
+Note that PIN numbers can start with one or more 0s.
+ 
+The given program pin.c computes h(n) for any given n specified as
+the command line argument. Compile it and run it for some smallish
+values of n to make sure it works. You can even compile with -DDEBUG
+to see all the intermediate values. A Makefile is provided for your
+convenience so that various examples can be compiled/executed by just
+typing "make XXXX" where "XXXX" is the name of one of the rules
+defined in the Makefile.
+
+Note that pin.c does not compute the entire sum and then reduce
+modulo 10000. Instead, it reduces modulo 10000 after each step in the
+main loop. This relies on the following mathematical property of
+modulo:
+
+                  (a0+a1)%n = (a0%n + a1)%n
+
+From this identity, we can deduce:
+
+(a0+a1+a2)%n = ((a0%n + a1)%n + a2)%n
+(a0+a1+a2+a3)%n = (((a0%n + a1)%n + a2)%n + a3)%n
+etc.
+
+The reason for doing this is to avoid the possibility that the sum
+will overflow, i.e., increase beyond the maximum value of an int. By
+reducing after each step, we ensure that the value of result never
+exceeds 10000.
+
+Your job: write a parallel, MPI-based version of this program. Call it
+pin_mpi.c. Develop and test the program with relatively small
+values of n.
+
+You should also add rules to the Makefile to help you run and test
+your parallel program.
+
+Next, add some timing code to measure the time it takes to perform
+the computation.  Modify the print statement so that it prints out a
+message of the following form:
+
+The PIN is 5309 (nprocs = 4, time = 3.27 sec.)
+
+NOTE: Please use the EXACT form above.  If you have any questions
+on how to get your output to appear in that form, ask us!!
+
+Once you are confident it is working, try running it on the big
+problem (n=10^10), with 40 processes and exclusive access. Note that
+all jobs will be killed after 3 minutes, so your program must be able
+to complete in less time.
+
+At the top of the pin_mpi.c file, insert
+in a comment the result of running your program for n=10^10 using as
+many processors as you can; for example, the first line of the file
+should look like:
+
+// The PIN is 2345 (nprocs = 40, time = 90.27 sec.)
+
+Commit:
+    pin.c
+    pin_mpi.c
+    Makefile
+
+
+2. pi
+
+Create a subdirectory called "pi".
+
+Estimate pi (3.1415....) as follows.  From Calculus, we know that
+
+pi = 4 * the integral from x=0 to x=1 of dx/(1+x^2).
+
+The program pi.c estimates the integral by breaking up the interval
+[0,1] into tiny subintervals and summing the areas of the resulting
+rectangles. The number of subintervals is given by the macro
+INTERVALS. The width of one rectangle is 1/INTERVALS. The midpoint of
+the base of the i-th rectangle is xi=(1.0/INTERVALS)*(i+0.5). The
+height of the rectangle is 4.0/(1+xi*xi). Multiplying the base times
+the height gives you the area.
+
+Create a parallel version of this program, pi_mpi.c. The work should
+be divided equally among the processes. It should print the final
+result in the **EXACT** same format as the sequential program. Note
+that the values printed may not be exactly the same, due to round-off
+error.
+
+Create a Makefile for your pi_mpi.c program. By typing just "make", 
+your parallel program should execute.
+
+Commit: 
+    pi.c
+    pi_mpi.c
+    Makefile
+
+
+3. Create a subdirectory called "pingpong".
+
+Write a program to measure the time it takes to send a 0-byte message
+between two nodes.  This time is the "latency" of communication.
+
+Your program takes no command line arguments. It should define a
+preprocessor macro NPINGS that specifies the number of times to repeat
+the timing experiment. That number must be very large to get an
+accurate measure, because the time to do one ping is very short and
+variable. Something like
+
+#define NPINGS 1000000
+
+should do.
+
+The program will measure the time for sending a message between
+process 0 and another process i!=0. It will do this for 1<=i<nprocs.
+
+Given i, the ping-pong game works like this: process 0 marks the time.
+It then sends a message (the ping) of 0 bytes to process i. Process i
+receives the message and sends back a message of 0 bytes (the pong).
+Process 0 receives the message and then sends another ping, ...., and
+the ping/pong is repeated NPINGS times. When the whole process
+completes, process 0 takes the time again. By dividing by 2*NPINGS, it
+computes the mean (average) time to send a message between process 0
+and process i. Process 0 then prints the result to the terminal using
+the following format string:
+
+"Average time to transmit between 0 and %d: %11.10f\n"
+
+where the %d is i and the %11.10f is the time, in seconds.
+Please use this exact format string.
+
+The program should play the ping-pong game for all
+i==1,2,...,nprocs-1.  So the total output from the program
+will look like
+
+Average time to transmit between 0 and 1: ...
+Average time to transmit between 0 and 2: ...
+.
+.
+.
+Average time to transmit between 0 and 19: ...
+
+Create a Makefile to compile and run the program. Typing simply "make"
+should run the program. Finally, save your output from running on
+beowulf (using srun -n ...) with 20 processes to a file ppout.txt. Add in
+plain English text any observations you have about the data. (This can
+be 1 or 2 sentences.)
+
+Note: Pay special attention to barriers. Where are they needed, and
+where are they not?
+
+Commit:
+   pingpong.c
+   Makefile
+   ppout.txt
+
+*Don't forget to push your commits*
