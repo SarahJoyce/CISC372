@@ -11,7 +11,7 @@ endif
 all : pingpong run
 
 pingpong : pingpong.c
-	$(MPICC) -o pingpong pingpong.c $(LINKS)
+	$(MPICC) -o pingpong pingpong.c $(LINKS) 1>ppout.txt
 
 # Add more rules here for running the MPI version ...
 
