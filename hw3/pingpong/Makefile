@@ -11,12 +11,12 @@ endif
 all : pingpong run
 
 pingpong : pingpong.c
-	$(MPICC) -o pingpong pingpong.c $(LINKS) 1>ppout.txt
+	$(MPICC) -o pingpong pingpong.c $(LINKS)
 
 # Add more rules here for running the MPI version ...
 
 run : pingpong
-	$(RUN) -n 20 ./pingpong
+	$(RUN) -n 20 ./pingpong >ppout.txt
 
 clean :
-	rm -f pingpong *~ a.out
+	rm -f pingpong *~ a.out *.txt
