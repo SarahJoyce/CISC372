@@ -2,7 +2,7 @@ CC = cc -pedantic -std=c11
 MPICC = mpicc -pedantic -std=c11
 LINKS = -lm
 SMALL  =        100
-MEDIUM =   10000000
+MEDIUM =   100000000
 LARGE = 10000000000
 
 HOST := $(shell hostname)
@@ -36,6 +36,9 @@ mpi_small : pin_mpi
 
 mpi_med : pin_mpi
 	$(RUN) -n 4 ./pin_mpi $(MEDIUM)
+
+mpi_large : pin_mpi
+	$(RUN) -n 4 ./pin_mpi $(LARGE)
 
 clean :
 	rm -f pin pin_mpi *~ a.out
